@@ -1,0 +1,90 @@
+version: "3"
+
+services:
+  master:
+    image: semantive/naggregator:0.1.0
+    command: bin/spark-class org.apache.spark.deploy.master.Master -h master
+    hostname: master
+    environment:
+      MASTER: spark://master:7077
+      SPARK_CONF_DIR: /conf
+      SPARK_PUBLIC_DNS: localhost
+    ports:
+      - 4040:4040
+      - 6066:6066
+      - 7077:7077
+      - 8080:8080
+    volumes:
+      - ./data:/tmp/data
+    links:
+      - kafka
+    networks:
+      - back-tier
+
+#  zookeeper:
+#    image: confluent/zookeeper
+#    ports:
+#      - "2181:2181"
+#    environment:
+#      zk_id: "1"
+#    networks:
+#      - back-tier
+
+  rest-proxy:
+    image: confluent/rest-proxy
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - "8082:8082"
+    environment:
+      RP_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      RP_SCHEMA_REGISTRY_URL: "http://localhost:8081"
+    networks:
+      - back-tier
+    logging:
+        driver: none
+
+#  kafka:
+#    image: confluent/kafka
+#    depends_on:
+#      - zookeeper
+#    ports:
+#      - "9092:9092"
+#    environment:
+#      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+#    networks:
+#      - back-tier
+
+  zookeeper:
+      image: confluentinc/cp-zookeeper
+      ports:
+        - "2181:2181"
+      environment:
+        ZOOKEEPER_CLIENT_PORT: 2181
+        ZOOKEEPER_TICK_TIME: 2000
+      networks:
+        - back-tier
+      logging:
+          driver: none
+
+  kafka:
+      image: confluentinc/cp-kafka
+      depends_on:
+        - zookeeper
+      ports:
+        - "9092:9092"
+      environment:
+        KAFKA_BROKER_ID: 0
+        KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+        KAFKA_ADVERTISED_LISTENERS:
+        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      networks:
+        - back-tier
+      logging:
+          driver: none
+
+
+networks:
+  back-tier:
