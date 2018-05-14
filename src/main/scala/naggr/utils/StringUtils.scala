@@ -24,10 +24,3 @@ trait StringUtils extends Serializable with FileUtils {
 
 }
 
-//def betterLowerRemoveAllWhitespace(s: String): Option[String] = {
-//val str = Option(s).getOrElse(return None)
-//Some(str.toLowerCase().replaceAll("\\s", ""))
-//}
-//
-//val betterLowerRemoveAllWhitespaceUDF = udf[Option[String], String](betterLowerRemoveAllWhitespace)
-
