@@ -25,10 +25,11 @@ resolvers += Resolver.mavenLocal
 libraryDependencies ++= {
     Seq(
         "com.typesafe" % "config" % "1.3.1",
-
+        "org.scalactic" %% "scalactic" % "3.0.5",
+        "org.scalatest" %% "scalatest" % "3.0.5" % "test",
         "com.github.catalystcode" %% "streaming-rss-html" % "1.0.2",
         "org.apache.spark" %% "spark-mllib" % "2.3.0",
-    "org.apache.spark" % "spark-core_2.11" % "2.3.0",
+        "org.apache.spark" % "spark-core_2.11" % "2.3.0",
         "org.apache.spark" % "spark-sql-kafka-0-10_2.11" % "2.3.0",
         "org.apache.spark" % "spark-sql_2.11" % "2.3.0",
 
@@ -66,16 +67,17 @@ assemblyExcludedJars in assembly := {
     }
 }
 
+
 // Disable tests (they require Spark)
 test in assembly := {}
 
 // publish to artifacts directory
 publishArtifact in(Compile, packageDoc) := false
 
+
 publishTo := Some(Resolver.file("file", new File("artifacts")))
 
 cleanFiles += baseDirectory { base => base / "artifacts" }.value
-
 
 
 
@@ -108,11 +110,10 @@ dockerfile in docker := {
         copy(dockerResourcesDir, dockerResourcesTargetPath)
         //Symlink the service jar to a non version specific name
         run("chmod", "+x", s"${dockerResourcesTargetPath}/spark-entrypoint.sh")
-//        run("hdfs dfs","-mkdir", "/tmp/sparkCheckpoint")
         entryPoint(s"${dockerResourcesTargetPath}/spark-entrypoint.sh")
     }
 }
-buildOptions in docker := BuildOptions(cache = true)
+buildOptions in docker := BuildOptions(cache = false)
 
 imageNames in docker := Seq(
     ImageName(

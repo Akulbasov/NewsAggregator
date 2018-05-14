@@ -6,6 +6,7 @@ set -x
 
 hdfs dfs -mkdir -p /tmp/sparkCheckpoint/cnn
 hdfs dfs -mkdir -p /tmp/sparkCheckpoint/trends
+hdfs dfs -mkdir -p /tmp/sparkCheckpoint/filter
 
 ${SPARK_HOME}/bin/spark-submit \
     --class "naggr.${APP_CLASS}" \
